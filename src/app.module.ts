@@ -1,21 +1,25 @@
 import { Module } from '@nestjs/common';
-import { PlatformModule } from './platform/platform.module'; // Adjust path if necessary
-import { Transport, ClientsModule } from '@nestjs/microservices';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ProviderController } from './Controller/provider.controller';
+import { ProviderService } from './Service/provider.service';
 
 @Module({
   imports: [
-    PlatformModule, // Import PlatformModule here
     ClientsModule.register([
       {
-        name: 'PLATFORM_SERVICE', // Service identifier for platform service
-        transport: Transport.TCP, // TCP transport configuration
+        name: 'PLATFORM_SERVICE',
+        transport: Transport.RMQ,
         options: {
-          host: 'localhost', // Set the host (could be different in real setup)
-          port: 3002, // Set port for Platform Service (should be different from UserService)
+          urls: ['amqp://localhost:5672'],
+          queue: 'platform_queue',
+          queueOptions: {
+            durable: false,
+          },
         },
       },
     ]),
   ],
-  providers: [],
+  controllers: [ProviderController],
+  providers: [ProviderService],
 })
 export class AppModule {}
